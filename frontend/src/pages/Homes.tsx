@@ -75,7 +75,7 @@ export default function Homes() {
 
         {data.tip && (
           <div className={`group-card flex flex-wrap items-start gap-4 p-6 ${limited ? "shadow-[0_0_0_2px_var(--color-orange)]" : ""}`}>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-[16rem]">
               <div className="t-caption font-semibold text-secondary">{limited ? t("plan_title_limited") : t("plan_title")}</div>
               <p className="t-body-lg mt-1 font-medium">{tipText(t, data.tip)}</p>
               <p className="t-caption mt-1 text-secondary">{labelFor(t, "f_", data.tip.factor, data.tip.label)}: {data.tip.points}/{data.tip.max_points}</p>

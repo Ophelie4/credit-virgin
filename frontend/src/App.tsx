@@ -20,13 +20,13 @@ const SessionCtx = createContext<Session>({ me: null, refresh: async () => {}, s
 export const useSession = () => useContext(SessionCtx);
 
 function Logo() {
-  return <Link to="/" className="text-[1.0625rem] font-semibold tracking-[-0.02em]">Credit Virgin</Link>;
+  return <Link to="/" className="shrink-0 whitespace-nowrap text-[0.9375rem] font-semibold tracking-[-0.02em] sm:text-[1.0625rem]">Credit Virgin</Link>;
 }
 
 export function LanguagePicker() {
   const { lang, setLang, t } = useT();
   return (
-    <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="t-caption rounded-full bg-fill px-3 py-1.5 font-medium" aria-label={t("language")}>
+    <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} className="t-caption max-w-[5.75rem] truncate rounded-full bg-fill px-2.5 sm:px-3 py-1.5 font-medium sm:max-w-none" aria-label={t("language")}>
       {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
     </select>
   );
@@ -41,7 +41,7 @@ function DemoSwitch() {
     <div className="flex rounded-full bg-fill p-0.5" role="group" aria-label={t("view_as")}>
       {(["renter", "landlord"] as Role[]).map((r) => (
         <button key={r} onClick={() => switchDemo(r)} aria-pressed={role === r}
-                className={`t-caption rounded-full px-3 py-1 font-medium transition-colors ${role === r ? "bg-white text-label shadow-[0_1px_3px_rgba(0,0,0,.12)]" : "text-secondary"}`}>
+                className={`t-caption rounded-full px-2 py-1 font-medium transition-colors sm:px-3 ${role === r ? "bg-white text-label shadow-[0_1px_3px_rgba(0,0,0,.12)]" : "text-secondary"}`}>
           {t(r === "renter" ? "role_renter" : "role_landlord")}
         </button>
       ))}
@@ -62,7 +62,11 @@ function AuthButton({ authEnabled }: { authEnabled: boolean }) {
       </button>
     );
   }
-  return <button className="btn py-1.5 text-[0.875rem]" onClick={() => loginWithRedirect()}><LogIn className="h-4 w-4" /> {t("nav_login")}</button>;
+  return (
+    <button className="btn px-2.5 py-1.5 text-[0.875rem] sm:px-4" onClick={() => loginWithRedirect()} aria-label={t("nav_login")}>
+      <LogIn className="h-4 w-4" /><span className="hidden sm:inline">{t("nav_login")}</span>
+    </button>
+  );
 }
 
 /* ---------------------------------------------------------------- welcome (pick a role) */
@@ -137,14 +141,14 @@ export default function App({ authEnabled }: { authEnabled: boolean }) {
     <SessionCtx.Provider value={{ me, refresh, signedIn, switchDemo }}>
       <div className="flex min-h-screen flex-col">
         <header className="material sticky top-0 z-20">
-          <div className="mx-auto flex h-12 max-w-5xl items-center justify-between gap-3 px-6">
+          <div className="mx-auto flex h-12 max-w-5xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6">
             <Logo />
             {!isReport && (
               <nav className="hidden items-center gap-1 md:flex">
                 {links.map(([to, label]) => <NavLink key={to} to={to} end={to === "/landlord"} className={link}>{label}</NavLink>)}
               </nav>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {!isReport && !signedIn && <DemoSwitch />}
               <LanguagePicker />
               {!isReport && <AuthButton authEnabled={authEnabled} />}
