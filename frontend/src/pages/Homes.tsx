@@ -47,7 +47,8 @@ export default function Homes() {
 
   if (err) return <p className="t-body mx-auto max-w-xl px-6 py-24 text-center text-red">{err}</p>;
   if (!data) return <div className="py-24 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-secondary" /></div>;
-  const limited = data.score != null && data.score < 35;
+  const fix = data.tip?.factor === "verification";
+  const limited = fix || (data.score != null && data.score < 35);
 
   return (
     <div className="bg-grouped min-h-full">
@@ -76,11 +77,13 @@ export default function Homes() {
         {data.tip && (
           <div className={`group-card flex flex-wrap items-start gap-4 p-6 ${limited ? "shadow-[0_0_0_2px_var(--color-orange)]" : ""}`}>
             <div className="min-w-0 flex-1 basis-[16rem]">
-              <div className="t-caption font-semibold text-secondary">{limited ? t("plan_title_limited") : t("plan_title")}</div>
+              <div className="t-caption font-semibold text-secondary">{fix ? t("plan_title_fix") : limited ? t("plan_title_limited") : t("plan_title")}</div>
               <p className="t-body-lg mt-1 font-medium">{tipText(t, data.tip)}</p>
-              <p className="t-caption mt-1 text-secondary">{labelFor(t, "f_", data.tip.factor, data.tip.label)}: {data.tip.points}/{data.tip.max_points}</p>
+              <p className="t-caption mt-1 text-secondary">
+                {fix ? labelFor(t, "c_", data.tip.check ?? "", data.tip.label) : `${labelFor(t, "f_", data.tip.factor, data.tip.label)}: ${data.tip.points}/${data.tip.max_points}`}
+              </p>
             </div>
-            <Link to="/upload" className="btn-tint">{t("add_documents")}</Link>
+            <Link to="/upload" className="btn-tint">{fix ? t("nav_upload") : t("add_documents")}</Link>
           </div>
         )}
 

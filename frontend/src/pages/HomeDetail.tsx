@@ -23,7 +23,12 @@ export default function HomeDetail() {
   const load = () => market.home(id).then(setH).catch((e) => setErr(e.message));
   useEffect(() => { load(); }, [id]);
 
-  if (err) return <p className="t-body mx-auto max-w-xl px-6 py-24 text-center text-red">{err}</p>;
+  if (err) return (
+    <div className="mx-auto max-w-xl px-6 py-24 text-center">
+      <p className="t-body text-red">{err}</p>
+      <Link to="/homes" className="btn-tint mt-6"><ChevronLeft className="h-4 w-4" /> {t("homes_title")}</Link>
+    </div>
+  );
   if (!h) return <div className="py-24 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-secondary" /></div>;
 
   const send = async () => { setBusy(true); try { await market.apply(h.id, msg); await load(); } catch (e) { setErr((e as Error).message); } finally { setBusy(false); } };

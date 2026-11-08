@@ -37,3 +37,16 @@ def test_every_sample_home_has_photos_and_a_tour_served_locally():
 def test_media_route_rejects_anything_but_cdn_file_names():
     for bad in ("../../.env", "x.mp4", "051351_9761b3ec.png", "051351_9761b3ec-6de7-4157-9f04-64eeaa16fe9e.exe"):
         assert not NAME.match(bad)
+
+
+def test_a_failed_check_becomes_the_first_thing_to_fix():
+    from types import SimpleNamespace as NS
+    from app.models import Check, ScoreFactor
+    from app.routers.marketplace import _weakest_tip
+    factors = [ScoreFactor(key="savings", label="Savings behaviour", points=11, max_points=15, detail=""),
+               ScoreFactor(key="history", label="History length", points=15, max_points=15, detail="")]
+    clean = NS(score=26, factors=factors, checks=[Check(key="rent_match", label="Rent", status="pass", detail="")])
+    capped = NS(score=26, factors=factors, checks=[Check(key="rent_match", label="Rent", status="fail", detail="")])
+    assert _weakest_tip(clean)["factor"] == "savings"
+    tip = _weakest_tip(capped)
+    assert tip["factor"] == "verification" and tip["check"] == "rent_match"

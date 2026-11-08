@@ -106,7 +106,7 @@ def rent_receipts_vs_payments(all_txs: list[Tx]) -> Check:
                      detail=f"All {matched} receipts in the statement period match a payment of the same amount within 3 days.{tail}")
     status = "fail" if len(mismatched) >= 2 or matched == 0 else "warn"
     return Check(key="rent_match", label="Rent receipts match actual payments", status=status,
-                 detail=f"{matched} matched, {len(mismatched)} did not: " + "; ".join(mismatched[:2]) + tail)
+                 detail=f"{matched} matched, {len(mismatched)} did not: " + "; ".join(mismatched[:2]) + "." + tail)
 
 
 def salary_regularity(all_txs: list[Tx]) -> Check:

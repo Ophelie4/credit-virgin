@@ -124,6 +124,9 @@ async def explain_score(summary: dict, language: str, audience: str = "applicant
 Write 3 short sentences (max 70 words total), no headings, no bullet points, no emojis.
 Use the numbers below; do not invent anything that is not in them. Refer to the score as a "cashflow trust score",
 never as a credit score.
+If "failed_checks" is present, the documents disagree and the score is capped at 45 no matter how good the other
+numbers look. Lead with that: say what did not match, using the figures in its detail. For the applicant, the one thing
+to do is remove that document or upload the original; do not suggest anything else. For a landlord, state it neutrally.
 
 Data (JSON): {summary}
 """

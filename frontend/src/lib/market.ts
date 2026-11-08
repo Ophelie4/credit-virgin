@@ -15,7 +15,7 @@ export type Home = {
   my_application?: string | null; my_application_note?: string | null;
   score?: number | null; tip?: Tip | null; application_count?: number; pending_count?: number;
 };
-export type Tip = { factor: string; label: string; points: number; max_points: number; tip: string };
+export type Tip = { factor: string; label: string; points: number; max_points: number; tip: string; check?: string };
 export type HomesResp = { score: number | null; band: string | null; us_monthly_income: number | null; tip: Tip | null; homes: Home[] };
 export type MyApp = { id: string; status: string; score_at_submit: number; landlord_note: string | null; created_at: string;
   decided_at: string | null; property_id: string; title: string; neighborhood: string | null; monthly_rent: number; palette: number; photo_urls: string[] | null; landlord_name: string };

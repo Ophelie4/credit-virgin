@@ -56,6 +56,10 @@ async def build_score(applicant_id: uuid.UUID, language: str, audience: str, wit
             "factors": [{"label": f.label, "points": f.points, "max": f.max_points, "detail": f.detail} for f in factors],
             "checks": [{"label": c.label, "status": c.status} for c in checks],
         }
+        failed = [{"label": c.label, "detail": c.detail} for c in checks if c.status == "fail"]
+        if failed:  # only added when something failed, so explanations already cached for clean files stay valid
+            summary["failed_checks"] = failed
+            summary["score_capped_at"] = 45
         out.explanation = await explain_score(summary, language, audience)
     return out
 

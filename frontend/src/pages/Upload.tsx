@@ -107,6 +107,7 @@ export default function Upload() {
               <div key={d.id} className="row flex items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="t-body font-semibold">{d.source_name || d.filename}</p>
+                  {d.source_name && <p className="t-caption truncate text-tertiary">{d.filename}</p>}
                   <p className="t-caption text-secondary">
                     {docTypeLabel(t, d.doc_type)}, {d.tx_count} {t("docs_transactions")}{d.currency ? `, ${d.currency}` : ""}{d.language ? `, ${d.language.toUpperCase()}` : ""}
                     {d.period_start && <span className="num"> · {d.period_start} – {d.period_end}</span>}

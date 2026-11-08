@@ -93,6 +93,17 @@ function Welcome() {
   );
 }
 
+function NotFound() {
+  const { t } = useT();
+  return (
+    <div className="mx-auto max-w-xl px-6 py-24 text-center">
+      <h1 className="t-title">{t("nf_title")}</h1>
+      <p className="t-body-lg mt-3 text-secondary">{t("nf_body")}</p>
+      <Link to="/" className="btn mt-8">{t("nf_cta")}</Link>
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------------- app */
 export default function App({ authEnabled }: { authEnabled: boolean }) {
   const { t } = useT();
@@ -176,6 +187,7 @@ export default function App({ authEnabled }: { authEnabled: boolean }) {
               <Route path="/landlord/listings/:id" element={<ListingForm />} />
               <Route path="/landlord/applications" element={<LandlordInbox />} />
               <Route path="/r/:token" element={<Report />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           )}
         </main>

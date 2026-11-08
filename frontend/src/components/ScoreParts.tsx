@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Loader2 } from "lucide-react";
 import { useT } from "../i18n";
 import type { Dict } from "../i18n/translations";
 import { fmtMoney, type Cashflow, type Check, type Factor, type Score } from "../lib/api";
@@ -135,7 +136,14 @@ export function Explanation({ text, score, loading = true }: { text: string | nu
     <div>
       <div className="t-caption font-semibold text-secondary">{t("explain_title")}</div>
       {text ? (
-        <p className="t-body-lg mt-2 max-w-[36rem] font-medium">{text}</p>
+        <>
+          <p className={`t-body-lg mt-2 max-w-[36rem] font-medium transition-opacity ${loading ? "opacity-40" : ""}`}>{text}</p>
+          {loading && (
+            <p className="t-caption mt-2 flex items-center gap-1.5 text-secondary" role="status">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("explain_updating")}
+            </p>
+          )}
+        </>
       ) : (
         <div className="mt-3 space-y-2" aria-hidden>
           <div className="h-4 w-[88%] animate-pulse rounded-md bg-fill" />
@@ -145,6 +153,13 @@ export function Explanation({ text, score, loading = true }: { text: string | nu
       )}
     </div>
   );
+}
+
+/** Says plainly why the score is lower than its factors add up to. */
+export function CapNote({ checks }: { checks: Check[] }) {
+  const { t } = useT();
+  if (!checks.some((c) => c.status === "fail")) return null;
+  return <p className="t-caption mt-3 rounded-[10px] bg-red/10 px-3 py-2 font-medium text-red">{t("score_capped")}</p>;
 }
 
 export function CashflowCharts({ data }: { data: Cashflow }) {

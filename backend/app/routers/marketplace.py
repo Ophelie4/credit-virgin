@@ -175,6 +175,12 @@ TIPS = {
 def _weakest_tip(score) -> dict | None:
     if not score.factors:
         return None
+    failed = next((c for c in score.checks if c.status == "fail"), None)
+    if failed:  # the score is capped until the documents agree, so that's the fastest fix
+        return {"factor": "verification", "label": failed.label, "points": score.score,
+                "max_points": sum(f.points for f in score.factors), "check": failed.key,
+                "tip": "One of your documents doesn't match the others. Remove it or upload the original, "
+                       "and your score is no longer capped at 45."}
     f = min(score.factors, key=lambda f: f.points / f.max_points)
     if f.points >= f.max_points:
         return None

@@ -4,7 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Loader2 } from "lucide-react";
 import { useT } from "../i18n";
 import { api, type Cashflow, type Score } from "../lib/api";
-import { CashflowCharts, Checks, Explanation, Factors, ScoreRing, Stats } from "../components/ScoreParts";
+import { CapNote, CashflowCharts, Checks, Explanation, Factors, ScoreRing, Stats } from "../components/ScoreParts";
 
 export default function Dashboard() {
   const { t, lang } = useT();
@@ -41,7 +41,10 @@ export default function Dashboard() {
       <div className="mx-auto max-w-5xl space-y-8 px-6 py-10 md:py-14">
         <header className="group-card grid gap-8 p-8 md:grid-cols-[auto_1fr] md:items-center md:p-10">
           <ScoreRing score={score.score} band={score.band} />
-          <Explanation text={score.explanation} score={score} loading={explaining} />
+          <div>
+            <Explanation text={score.explanation} score={score} loading={explaining} />
+            <CapNote checks={score.checks} />
+          </div>
         </header>
         <Link to="/homes" className="group-card flex flex-wrap items-center justify-between gap-4 p-6 transition-transform active:scale-[.99]">
           <div>
@@ -75,9 +78,11 @@ function SharePanel() {
     try { await api.createShare("Landlord"); setLinks(await api.listShares()); } finally { setBusy(false); }
   };
   const latest = links[0];
+  // Built from the page's own address so the link and QR code work on any host (localhost, tunnel, domain).
+  const shareUrl = latest ? `${window.location.origin}/r/${latest.token}` : "";
   const copy = async () => {
     if (!latest) return;
-    await navigator.clipboard.writeText(latest.url);
+    await navigator.clipboard.writeText(shareUrl);
     setCopied(true); setTimeout(() => setCopied(false), 1500);
   };
 
@@ -94,16 +99,16 @@ function SharePanel() {
           ) : (
             <>
               <button className="btn" onClick={copy}>{copied ? t("share_copied") : t("share_copy")}</button>
-              <a className="btn-tint" href={latest.url} target="_blank" rel="noreferrer">{t("share_open")}</a>
+              <a className="btn-tint" href={shareUrl} target="_blank" rel="noreferrer">{t("share_open")}</a>
               <span className="num t-caption text-secondary">{latest.views} {t("share_views")}</span>
             </>
           )}
         </div>
-        {latest && <p className="t-caption mt-3 break-all font-mono text-tertiary">{latest.url}</p>}
+        {latest && <p className="t-caption mt-3 break-all font-mono text-tertiary">{shareUrl}</p>}
       </div>
       {latest && (
         <div className="justify-self-center rounded-2xl bg-white p-3 shadow-[0_0_0_0.5px_var(--color-separator)]">
-          <QRCodeSVG value={latest.url} size={128} fgColor="#1d1d1f" />
+          <QRCodeSVG value={shareUrl} size={128} fgColor="#1d1d1f" />
         </div>
       )}
     </section>

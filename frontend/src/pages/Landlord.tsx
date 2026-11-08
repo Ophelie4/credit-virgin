@@ -93,6 +93,13 @@ export function ListingForm() {
   const [p, setP] = useState<PropertyIn>(EMPTY);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  // Two taps to delete: the first arms the button for a few seconds, so a misclick never removes a listing.
+  const onDelete = async () => {
+    if (!id) return;
+    if (!confirmDelete) { setConfirmDelete(true); setTimeout(() => setConfirmDelete(false), 4000); return; }
+    await market.deleteProperty(id); nav("/landlord");
+  };
   useEffect(() => {
     if (!id) return;
     market.myProperties().then((all) => {
@@ -121,7 +128,7 @@ export function ListingForm() {
 
         <section><h3 className="t-heading mb-3 px-1">{t("s_basics")}</h3>
           <div className="group-card">
-            <Field label={t("l_title")}><input className={input} required value={p.title} onChange={(e) => set("title", e.target.value)} placeholder="Sunny 1-bed near the park" /></Field>
+            <Field label={t("l_title")}><input className={input} required value={p.title} onChange={(e) => set("title", e.target.value)} placeholder={t("l_title_ph")} /></Field>
             <div className="grid sm:grid-cols-2">
               <Field label={t("l_type")}>
                 <select className={input} value={p.property_type || ""} onChange={(e) => set("property_type", e.target.value)}>
@@ -196,7 +203,7 @@ export function ListingForm() {
         <div className="flex flex-wrap gap-2">
           <button className="btn" disabled={busy}>{busy && <Loader2 className="h-4 w-4 animate-spin" />}{id ? t("save") : t("ll_publish")}</button>
           <Link to="/landlord" className="btn-tint">{t("cancel")}</Link>
-          {id && <button type="button" className="btn-plain ml-auto text-red" onClick={async () => { await market.deleteProperty(id); nav("/landlord"); }}>{t("ll_delete")}</button>}
+          {id && <button type="button" className={`ml-auto ${confirmDelete ? "btn bg-red" : "btn-plain text-red"}`} onClick={onDelete}>{confirmDelete ? t("ll_delete_confirm") : t("ll_delete")}</button>}
         </div>
       </form>
     </div>
@@ -237,7 +244,7 @@ export function LandlordInbox() {
               <div className="row">
                 <span className={`pill ${meets ? "pill-pass" : "pill-warn"}`}>{meets ? t("ll_meets") : t("ll_below")}</span>
                 {a.message && <p className="t-body mt-3">“{a.message}”</p>}
-                {a.report_url && <a href={a.report_url} target="_blank" rel="noreferrer" className="btn-plain mt-2 px-0">{t("ll_open_report")}</a>}
+                {a.report_url && <a href={new URL(a.report_url).pathname} target="_blank" rel="noreferrer" className="btn-plain mt-2 px-0">{t("ll_open_report")}</a>}
               </div>
               {a.status === "pending" ? (
                 <div className="row space-y-3">

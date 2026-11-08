@@ -3,17 +3,19 @@ import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useT } from "../i18n";
 import { api, type Report as ReportT } from "../lib/api";
-import { Checks, Explanation, Factors, ScoreRing, Stats, docTypeLabel } from "../components/ScoreParts";
+import { CapNote, Checks, Explanation, Factors, ScoreRing, Stats, docTypeLabel } from "../components/ScoreParts";
 
 export default function Report() {
   const { token = "" } = useParams();
   const { t, lang } = useT();
   const [data, setData] = useState<ReportT | null>(null);
   const [err, setErr] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
-    api.report(token, lang).then((d) => alive && setData(d)).catch(() => alive && setErr(true));
+    setLoading(true);
+    api.report(token, lang).then((d) => alive && setData(d)).catch(() => alive && setErr(true)).finally(() => alive && setLoading(false));
     return () => { alive = false; };
   }, [token, lang]);
 
@@ -31,7 +33,10 @@ export default function Report() {
         </header>
         <section className="group-card grid gap-8 p-8 md:grid-cols-[auto_1fr] md:items-center">
           <ScoreRing score={s.score} band={s.band} />
-          <Explanation text={s.explanation} score={s} loading={false} />
+          <div>
+            <Explanation text={s.explanation} score={s} loading={loading} />
+            <CapNote checks={s.checks} />
+          </div>
         </section>
         <Stats s={s} />
         <Checks checks={s.checks} />
