@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Apple system palette, light appearance */
+  --color-bg: #ffffff;
+  --color-grouped: #f5f5f7;
+  --color-fill: #e8e8ed;
+  --color-label: #1d1d1f;
+  --color-secondary: #6e6e73;
+  --color-tertiary: #aeaeb2;
+  --color-separator: rgba(60, 60, 67, 0.12);
+  --color-blue: #0071e3;
+  --color-blue-hover: #0077ed;
+  --color-green: #34c759;
+  --color-orange: #ff9f0a;
+  --color-red: #ff3b30;
+  --color-indigo: #5e5ce6;
+}
+
+html { background: var(--color-bg); color: var(--color-label); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* Type scale: tracking tightens as size grows, leading loosens as it shrinks */
+.t-display { font-size: clamp(2.75rem, 6.5vw, 5rem); line-height: 1.02; letter-spacing: -0.035em; font-weight: 700; }
+.t-title   { font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.1; letter-spacing: -0.025em; font-weight: 700; }
+.t-heading { font-size: 1.375rem; line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; }
+.t-body-lg { font-size: 1.1875rem; line-height: 1.45; letter-spacing: -0.012em; }
+.t-body    { font-size: 1.0625rem; line-height: 1.47; letter-spacing: -0.01em; }
+.t-caption { font-size: 0.8125rem; line-height: 1.38; letter-spacing: -0.004em; }
+.num { font-variant-numeric: tabular-nums; }
+
+@layer components {
+  /* Inset grouped card */
+  .group-card {
+    background: var(--color-bg);
+    border-radius: 18px;
+    box-shadow: 0 0 0 0.5px var(--color-separator), 0 2px 12px -6px rgba(0,0,0,.08);
+  }
+  .on-white .group-card { background: var(--color-grouped); box-shadow: none; }
+  .row { padding: 1rem 1.25rem; }
+  .row + .row { box-shadow: inset 0 0.5px 0 var(--color-separator); }
+
+  /* Buttons: pill, instant press feedback */
+  .btn, .btn-tint, .btn-plain {
+    display: inline-flex; align-items: center; gap: .4rem; border-radius: 980px;
+    padding: .7rem 1.25rem; font-size: 1.0625rem; font-weight: 500; letter-spacing: -0.01em; line-height: 1;
+    text-decoration: none; cursor: pointer; border: 0;
+    transition: transform 120ms cubic-bezier(.2,.8,.2,1), background-color 150ms, opacity 150ms;
+  }
+  .btn { background: var(--color-blue); color: #fff; }
+  .btn:hover { background: var(--color-blue-hover); }
+  .btn-tint { background: var(--color-fill); color: var(--color-label); }
+  .btn-tint:hover { background: #dcdce1; }
+  .btn-plain { background: transparent; color: var(--color-blue); padding-inline: .5rem; }
+  .btn-plain:hover { text-decoration: underline; }
+  .btn:active, .btn-tint:active { transform: scale(.97); }
+  .btn:disabled, .btn-tint:disabled { opacity: .45; cursor: not-allowed; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: .3rem; border-radius: 980px;
+    padding: .2rem .6rem; font-size: .8125rem; font-weight: 600; letter-spacing: -0.004em;
+  }
+  .pill-pass { background: rgba(52,199,89,.14); color: #1f8f3f; }
+  .pill-warn { background: rgba(255,159,10,.16); color: #b36b00; }
+  .pill-fail { background: rgba(255,59,48,.13); color: #c7261c; }
+  .pill-skip { background: var(--color-fill); color: var(--color-secondary); }
+
+  /* Translucent chrome */
+  .material {
+    background: rgba(255,255,255,.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  @media (prefers-reduced-transparency: reduce) { .material { background: #fff; backdrop-filter: none; } }
+
+  /* Activity-style ring */
+  .ring-track { stroke: var(--color-fill); }
+  .ring-fill { transition: stroke-dashoffset 900ms cubic-bezier(.2,.8,.2,1); }
+  @media (prefers-reduced-motion: reduce) { .ring-fill { transition: none; } .btn:active, .btn-tint:active { transform: none; } }
+}
+
+:focus-visible { outline: 3px solid rgba(0,113,227,.5); outline-offset: 2px; border-radius: 6px; }

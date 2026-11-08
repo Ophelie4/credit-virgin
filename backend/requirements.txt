@@ -1,0 +1,11 @@
+fastapi>=0.118
+uvicorn[standard]>=0.37
+python-multipart>=0.0.20
+asyncpg>=0.30
+pydantic>=2.12
+pydantic-settings>=2.11
+google-genai>=1.40
+PyJWT[crypto]>=2.10
+httpx>=0.28
+python-dotenv>=1.1
+pypdf>=5.0
