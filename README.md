@@ -42,7 +42,7 @@ Requirements are set by each landlord and apply equally to every applicant; the 
 | Auth | **Auth0** (SPA login, JWT-verified API) |
 | Backend | Python, FastAPI, asyncpg |
 | Frontend | React, Vite, Tailwind, Recharts |
-| Hosting | **Vultr**, at creditvirgin.tech |
+| Sharing | Cloudflare quick tunnel (`share.sh`) for a public demo link |
 
 ## Run it locally
 
@@ -58,6 +58,17 @@ seeded on first start. With Auth0 configured, real accounts pick a role on first
 
 Demo documents live in `samples/` (fictional applicant, fictional providers). Upload the three genuine ones for a clean
 score, then add `TAMPERED_rent_receipts_2024.pdf` to watch the verification layer catch it.
+
+## Share a public link
+
+With the app running (`bash dev.sh`), run this in a second terminal:
+
+```bash
+bash share.sh            # prints https://<random-words>.trycloudflare.com
+```
+
+Anyone with the link can use the demo while the laptop is awake. Login is offered only on hosts listed in
+`VITE_AUTH0_HOSTS` (Auth0 must allow them as callback URLs); everywhere else the app runs in demo mode.
 
 ## Privacy
 

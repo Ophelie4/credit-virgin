@@ -16,3 +16,4 @@ dist/
 *.log
 *.tsbuildinfo
 backend/media_cache/
+.bin/

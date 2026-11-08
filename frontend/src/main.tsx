@@ -9,18 +9,22 @@ import "./index.css";
 const domain = import.meta.env.VITE_AUTH0_DOMAIN as string | undefined;
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string | undefined;
 const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string | undefined;
+// Login only where Auth0 lists this address as an allowed callback; elsewhere (e.g. a share.sh tunnel) run the demo.
+const authHosts = ((import.meta.env.VITE_AUTH0_HOSTS as string | undefined) || "localhost")
+  .split(",").map((h) => h.trim()).filter(Boolean);
+const authHere = Boolean(domain && clientId) && authHosts.includes(window.location.hostname);
 
 const tree = (
   <I18nProvider>
     <BrowserRouter>
-      <App authEnabled={Boolean(domain && clientId)} />
+      <App authEnabled={authHere} />
     </BrowserRouter>
   </I18nProvider>
 );
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {domain && clientId ? (
+    {authHere && domain && clientId ? (
       <Auth0Provider
         domain={domain}
         clientId={clientId}
