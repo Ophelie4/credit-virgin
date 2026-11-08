@@ -37,7 +37,7 @@ async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const market = {
   me: () => req<Me>("/api/me"),
-  updateMe: (b: Partial<Pick<Me, "role" | "us_monthly_income" | "display_name">>) => req<Me>("/api/me", { method: "POST", body: JSON.stringify(b) }),
+  updateMe: (b: Partial<Pick<Me, "role" | "us_monthly_income" | "display_name" | "email">>) => req<Me>("/api/me", { method: "POST", body: JSON.stringify(b) }),
   homes: () => req<HomesResp>("/api/homes"),
   home: (id: string) => req<Home>(`/api/homes/${id}`),
   apply: (id: string, message: string) => req<{ ok: true; score: number }>(`/api/homes/${id}/apply`, { method: "POST", body: JSON.stringify({ message }) }),

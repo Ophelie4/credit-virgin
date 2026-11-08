@@ -21,7 +21,8 @@ router = APIRouter(prefix="/api", tags=["marketplace"])
 class MeIn(BaseModel):
     role: str | None = Field(default=None, pattern="^(renter|landlord)$")
     us_monthly_income: float | None = Field(default=None, ge=0)
-    display_name: str | None = None
+    display_name: str | None = Field(default=None, max_length=120)
+    email: str | None = Field(default=None, max_length=254)
 
 
 @router.get("/me")
@@ -40,6 +41,8 @@ async def update_me(body: MeIn, uid: uuid.UUID = ApplicantId):
         await pool.execute("UPDATE applicants SET us_monthly_income=$2 WHERE id=$1", uid, body.us_monthly_income)
     if body.display_name:
         await pool.execute("UPDATE applicants SET display_name=$2 WHERE id=$1", uid, body.display_name)
+    if body.email:
+        await pool.execute("UPDATE applicants SET email=$2 WHERE id=$1", uid, body.email)
     return await get_me(uid)
 
 

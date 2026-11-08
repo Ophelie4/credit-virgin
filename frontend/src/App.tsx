@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import { LogIn, LogOut } from "lucide-react";
@@ -94,9 +94,19 @@ export default function App({ authEnabled }: { authEnabled: boolean }) {
   const { t } = useT();
   const loc = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently, user } = useAuth0();
   const [me, setMe] = useState<Me | null>(null);
   const signedIn = authEnabled && isAuthenticated;
+
+  // API access tokens carry no profile claims, so hand the backend the signed-in user's name and email once.
+  const profileSent = useRef(false);
+  useEffect(() => {
+    if (signedIn && me && user && (!me.display_name || !me.email) && !profileSent.current) {
+      profileSent.current = true;
+      market.updateMe({ display_name: me.display_name || user.name || user.nickname || undefined, email: me.email || user.email || undefined })
+        .then(setMe).catch(() => {});
+    }
+  }, [signedIn, me, user]);
 
   useEffect(() => {
     setTokenGetter(signedIn ? () => getAccessTokenSilently().then((x) => x ?? null).catch(() => null) : null);
