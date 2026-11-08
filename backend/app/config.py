@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     gemini_fallback_models: str = "gemini-3.7-flash,gemini-3.6-flash,gemini-3.5-flash,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-2.5-flash"
     # Cache of extraction results keyed by file hash: repeat uploads are instant and need no API call
     extraction_cache_dir: str = "extraction_cache"
+    media_cache_dir: str = "media_cache"
 
     # Auth0 (optional until wired; when unset, a demo applicant is used)
     auth0_domain: str = ""

@@ -28,6 +28,8 @@ Requirements are set by each landlord and apply equally to every applicant; the 
    A failed check caps the score. Evidence that disagrees isn't evidence.
 3. **An explainable score.** Five factors (income stability, payment consistency, savings behaviour, balance health,
    history length), every point with its reason. Gemini writes the plain-language summary in the reader's language.
+   Payment consistency counts recurring bills (electricity, water, phone, loan instalments, school fees) as well as
+   rent, so someone who lives with family and pays no rent can still show a payment history.
 4. **Share one page.** A link or QR code opens a read-only report for the landlord, in English, French, Kinyarwanda,
    Spanish, Haitian Creole or Portuguese.
 
@@ -57,6 +59,27 @@ seeded on first start. With Auth0 configured, real accounts pick a role on first
 Demo documents live in `samples/` (fictional applicant, fictional providers). Upload the three genuine ones for a clean
 score, then add `TAMPERED_rent_receipts_2024.pdf` to watch the verification layer catch it.
 
+## Privacy
+
+Documents are used only to calculate the score. Landlords see the score report, never the files, and only when the
+renter applies or sends a link. Any document can be removed, or everything reset, at any time.
+
+## Tests
+
+```bash
+cd backend && pip install -r requirements-dev.txt && python -m pytest -q
+```
+
+41 tests, no database or API key needed. They cover the scoring rules, category guardrails in six languages, every
+verification check, home matching, and the whole demo story: the sample PDFs are read with the offline parser, the
+genuine set scores 92 with all four checks passing, and the tampered receipts are caught and cap the score at 45.
+GitHub Actions runs them on every push.
+
+## Offline demo
+
+Sample listing photos and walkthrough videos are downloaded once into `backend/media_cache/` when the backend starts,
+then served locally from `/api/media`, so the tours keep playing if the venue Wi-Fi drops.
+
 ## Project layout
 
 ```
@@ -68,6 +91,8 @@ backend/app
   services/verification.py  Cross-document checks
   routers/           documents, score/cashflow, share/report, marketplace (listings, matching, applications)
   services/local_parser.py  Text-layer statement parser, used when Gemini is unavailable
+  routers/media.py   Local cache for listing photos and walkthrough videos
+backend/tests        pytest suite (runs offline)
 frontend/src
   i18n/              6 languages, all UI strings
   pages/             Landing, Upload, Dashboard, Report (public), Homes, HomeDetail, MyApplications, Landlord

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Loader2, Trash2 } from "lucide-react";
+import { FileText, Loader2, Lock, Trash2 } from "lucide-react";
 import { useT } from "../i18n";
 import { api, type Doc } from "../lib/api";
 import { docTypeLabel } from "../components/ScoreParts";
@@ -68,6 +68,11 @@ export default function Upload() {
         <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 px-1">
           <button type="button" className="btn-plain px-0" onClick={useSamples} disabled={processing > 0}>{t("upload_samples")}</button>
           <span className="t-caption text-tertiary">{t("upload_samples_hint")}</span>
+        </div>
+
+        <div className="mt-5 flex gap-3 rounded-[14px] bg-fill px-4 py-3.5">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
+          <p className="t-caption text-secondary"><span className="font-semibold text-label">{t("privacy_title")}</span> {t("privacy_body")}</p>
         </div>
 
         {jobs.length > 0 && (

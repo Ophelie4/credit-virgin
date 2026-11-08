@@ -349,7 +349,8 @@ SAMPLE_LISTINGS = [
 ]
 
 
-CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_3JkGjNqq8OOj9gf4yMqVWNIEXF6/hf_20261108_"
+# Sample photos and walkthroughs are served through /api/media, which keeps a local copy so the demo works offline.
+CDN = "/api/media/"
 SAMPLE_MEDIA: dict[str, dict] = {
     "Sunny studio near Calle Ocho": {"photo_urls": [CDN + "051351_9761b3ec-6de7-4157-9f04-64eeaa16fe9e.png",
         CDN + "051429_0116bdd1-a019-4518-88af-e115b576bfd3.png", CDN + "051429_1cbb21fe-62c1-4bb8-9162-adc0ad5000a2.png"],
@@ -372,6 +373,12 @@ SAMPLE_MEDIA: dict[str, dict] = {
 }
 for _s in SAMPLE_LISTINGS:
     _s.update(SAMPLE_MEDIA.get(_s["title"], {}))
+
+
+def sample_media_files() -> list[str]:
+    """File names of every sample photo and walkthrough, for the offline cache."""
+    urls = [u for m in SAMPLE_MEDIA.values() for u in [*m.get("photo_urls", []), m.get("tour_url")] if u]
+    return [u.removeprefix(CDN) for u in urls]
 
 
 async def attach_sample_media() -> None:

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -6,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db import close_pool, init_schema
-from .routers import documents, marketplace, score, share
+from .routers import documents, marketplace, media, score, share
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
@@ -15,7 +16,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(messag
 async def lifespan(_: FastAPI):
     await init_schema()
     await marketplace.seed_samples()
+    warmup = asyncio.create_task(media.warm(marketplace.sample_media_files()))
     yield
+    warmup.cancel()
     await close_pool()
 
 
@@ -31,6 +34,7 @@ app.include_router(documents.router)
 app.include_router(score.router)
 app.include_router(share.router)
 app.include_router(marketplace.router)
+app.include_router(media.router)
 
 
 @app.get("/api/health")

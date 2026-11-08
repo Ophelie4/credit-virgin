@@ -5,6 +5,9 @@ from statistics import mean, pstdev
 
 from ..models import ScoreFactor
 
+# Recurring obligations that show someone pays what they owe, on time, every month.
+BILL_CATEGORIES = {"utilities", "airtime", "loan_repayment", "education"}
+
 BANDS = [(80, "Excellent"), (65, "Strong"), (50, "Fair"), (35, "Building"), (0, "Limited")]
 
 
@@ -22,10 +25,27 @@ def _cv(values: list[float]) -> float:
     return pstdev(vals) / mean(vals)
 
 
+def summarize_payments(txs: list[dict]) -> dict:
+    """Rent and bill months from transaction rows (oldest first), as used by the payment-consistency factor."""
+    # Months in which rent was expected = months covered by any statement; paid = months with a rent 'out' row
+    stmt_months = {(t["time"].year, t["time"].month) for t in txs if t["doc_type"] != "rent_receipts"}
+    rent_months = {(t["time"].year, t["time"].month) for t in txs if t["category"] == "rent" and t["direction"] == "out"}
+    bill_months = {(t["time"].year, t["time"].month) for t in txs if t["category"] in BILL_CATEGORIES and t["direction"] == "out"}
+    return {
+        "rent_months_expected": len(stmt_months) if stmt_months else len(rent_months),
+        "rent_months_paid": len(rent_months & stmt_months) if stmt_months else len(rent_months),
+        "bill_months_expected": len(stmt_months),
+        "bill_months_paid": len(bill_months & stmt_months),
+        "negative_balance_rows": sum(1 for t in txs if t["balance"] is not None and float(t["balance"]) < 0),
+        "has_balance": any(t["balance"] is not None for t in txs),
+    }
+
+
 def compute_factors(months: list[dict], tx_summary: dict) -> tuple[int, list[ScoreFactor]]:
     """
     months: rows from monthly_cashflow (inflow, outflow, rent_paid, saved, salary, min_balance), oldest first.
-    tx_summary: {'rent_months_expected': int, 'rent_months_paid': int, 'negative_balance_rows': int, 'has_balance': bool}
+    tx_summary: {'rent_months_expected', 'rent_months_paid', 'bill_months_expected', 'bill_months_paid',
+                 'negative_balance_rows', 'has_balance'}
     """
     factors: list[ScoreFactor] = []
     n = len(months)
@@ -47,16 +67,27 @@ def compute_factors(months: list[dict], tx_summary: dict) -> tuple[int, list[Sco
         pts, detail = 4, f"Monthly income varied by {cv:.0%}: irregular."
     factors.append(ScoreFactor(key="income_stability", label="Income stability", points=pts, max_points=25, detail=detail))
 
-    # 2. Payment consistency (30): rent paid every month it was expected
+    # 2. Payment consistency (30): rent and recurring bills paid month after month.
+    # Bills (electricity, water, phone, loan instalments, school fees) count too, so someone who lives with
+    # family and pays no rent can still show a payment history, the way credit bureaus now accept utility data.
     exp, paid = tx_summary.get("rent_months_expected", 0), tx_summary.get("rent_months_paid", 0)
-    if exp == 0:
-        pts, detail = 8, "No rent payments were found in the documents."
-    else:
+    bill_exp = tx_summary.get("bill_months_expected", exp)
+    bills = tx_summary.get("bill_months_paid", 0)
+    bill_ratio = (bills / bill_exp) if bill_exp else None  # None: no statements, so bills can't be measured
+    if exp and paid:
         ratio = paid / exp
-        pts = round(30 * ratio)
+        pts = round(30 * ratio) if bill_ratio is None else round(22 * ratio + 8 * bill_ratio)
         detail = f"Rent was paid in {paid} of {exp} months covered."
         if ratio == 1:
             detail += " No missed months."
+        if bills:
+            detail += f" Bills were paid in {bills} of {bill_exp} months."
+    elif bills and bill_ratio:
+        pts = round(24 * bill_ratio)
+        detail = (f"No rent payments were found, so recurring bills count instead: paid in {bills} of {bill_exp} "
+                  "months (utilities, phone, loan instalments or school fees).")
+    else:
+        pts, detail = 4, "No rent or recurring bill payments were found in the documents."
     factors.append(ScoreFactor(key="payment_consistency", label="Payment consistency", points=pts, max_points=30, detail=detail))
 
     # 3. Savings behaviour (15): share of income set aside

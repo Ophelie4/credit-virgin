@@ -9,7 +9,7 @@ from ..db import get_pool
 from ..models import ScoreOut
 from ..services import verification
 from ..services.gemini import explain_score
-from ..services.scoring import band_for, compute_factors
+from ..services.scoring import band_for, compute_factors, summarize_payments
 
 log = logging.getLogger("creditvirgin.score")
 router = APIRouter(prefix="/api", tags=["score"])
@@ -25,15 +25,7 @@ async def build_score(applicant_id: uuid.UUID, language: str, audience: str, wit
         docs = {str(r["id"]): dict(r) for r in await conn.fetch(
             "SELECT id, doc_type, opening_balance, currency FROM documents WHERE applicant_id=$1", applicant_id)}
 
-    # Months in which rent was expected = months covered by any statement; paid = months with a rent 'out' row
-    stmt_months = {(t["time"].year, t["time"].month) for t in txs if t["doc_type"] != "rent_receipts"}
-    rent_months = {(t["time"].year, t["time"].month) for t in txs if t["category"] == "rent" and t["direction"] == "out"}
-    tx_summary = {
-        "rent_months_expected": len(stmt_months) if stmt_months else len(rent_months),
-        "rent_months_paid": len(rent_months & stmt_months) if stmt_months else len(rent_months),
-        "negative_balance_rows": sum(1 for t in txs if t["balance"] is not None and float(t["balance"]) < 0),
-        "has_balance": any(t["balance"] is not None for t in txs),
-    }
+    tx_summary = summarize_payments(txs)
     score, factors = compute_factors(months, tx_summary)
     checks = verification.run_all(txs, docs) if txs else []
 
